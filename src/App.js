@@ -14,7 +14,8 @@ import PatientsList from "./views/admin/Patients";
 import Tables from "./views/admin/Tables";
 import Settings from "./views/admin/Settings";
 import Upload from "./views/admin/Upload";
-import File from "./views/admin/File";
+import File from "./views/admin/FileAt";
+import FileFacture from "./views/admin/FileFacture";
 
 
 // views without layouts
@@ -32,6 +33,7 @@ function App() {
 <Route path="/admin/settings" element={<Settings/>} ></Route>
 <Route path="/admin/tables" element={<Tables/>} ></Route>
 <Route path="/admin/File/:id" element={<File/>} ></Route>
+<Route path="/admin/FileFacture/:id" element={<FileFacture/>} ></Route>
 <Route path="/admin/upload" element={<Upload/>} ></Route>
 <Route path="/admin/patients" element={<PatientsList/>} >
     </Route>

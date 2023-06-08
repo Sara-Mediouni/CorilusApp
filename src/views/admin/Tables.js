@@ -24,10 +24,24 @@ const navigate = useNavigate();
   const handleClose = () => {
     setAnchorEl(null);
   };
-  const routeChange = (id) =>{ 
-    let path = `/admin/File/${id}`; 
+  const routeChange = (id, fileType) => { 
+    let path;
+    
+    switch (fileType) {
+      case "FACTURE_REJETÉE":
+        path = `/admin/File/${id}`;
+        break;
+      case "FACTURE":
+        path = `/admin/FileFacture/${id}`;
+        break;
+      default:
+        path = `/admin/File/${id}`;
+        break;
+    }
+    
     navigate(path);
   }
+  
   /*function deletefile(id){
     axios.delete(`http://localhost:8080/files/${id}`)
  .then(function (response) {
@@ -83,7 +97,7 @@ const navigate = useNavigate();
   renderCell: (params)  => {
     return(
       <div>
-      <IconButton className="fa-sharp fa-solid fa-ellipsis-vertical" aria-describedby={id} variant="contained" onClick={()=>routeChange(params.id)}>
+      <IconButton className="fa-sharp fa-solid fa-ellipsis-vertical" aria-describedby={id} variant="contained" onClick={()=>routeChange(params.id,params.row.Type)}>
       
       </IconButton>
       

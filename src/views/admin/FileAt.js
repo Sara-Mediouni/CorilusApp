@@ -16,6 +16,8 @@ import HeaderStats from "../../components/Headers/HeaderStats.js";
 import FooterAdmin from "../../components/Footers/FooterAdmin.js";
 import axios from 'axios';
 import { makeStyles } from '@material-ui/core/styles';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { kebabCase } from 'lodash';
 
 const useStyles = makeStyles({
   tableCell: {
@@ -61,9 +63,15 @@ function File() {
   const [type90,setType90] = React.useState([{contenu:'',zoneEmbedded:{longueur:'',desription:'',nom_zone:''}}]);
   const [type95,setType95] = React.useState([{contenu:'',zoneEmbedded:{longueur:'',desription:'',nom_zone:''}}]);
   const [type96,setType96] = React.useState([{contenu:'',zoneEmbedded:{longueur:'',desription:'',nom_zone:''}}]);
+  const [attestation,setAttestation] = React.useState([{content:'',type:'',zone:[{contenu:'',zoneEmbedded:{longueur:'',desription:'',nom_zone:''}}],zoneErreur:[]}])
+  const [showTables, setShowTables] = React.useState(false);
 
   // Inside your component
 const classes = useStyles();
+const toggleTables = () => {
+    setShowTables(!showTables);
+  };
+
   function getById() {
     axios
       .get(`http://localhost:8080/files/${id}`)
@@ -71,6 +79,10 @@ const classes = useStyles();
         const recordRejetArray = response.data.recordRejet;
         console.log(recordRejetArray);
        
+        let attestation1=[]
+        let attestationArray=[];
+        
+        let prestationArray=[];
     
 
         // Iterate over the array
@@ -113,9 +125,8 @@ const classes = useStyles();
             case "20":
                   // Object with type="20" found
                   const extractedObject20 = object;
-                  setType20(extractedObject20.zone);
-                  const zoneErreur2 = extractedObject20.zoneErreur;
-                  setType20Error(zoneErreur2);
+                  attestationArray.push(extractedObject20);
+
                   
                 
                   
@@ -149,10 +160,22 @@ const classes = useStyles();
             case "50":
                         // Object with type="50" found
                         const extractedObject50 = object;
-                        setType50(extractedObject50.zone);
-                        const zoneErreur = extractedObject50.zoneErreur;
-                        setType50Error(zoneErreur);
-                       
+                        prestationArray.push(extractedObject50);
+                        const objectsucc=recordRejetArray[i+1]
+                        if (objectsucc.type==="51")
+                        { prestationArray.push(objectsucc);
+                            attestationArray.push(prestationArray);
+                            prestationArray=[]
+                        }
+                       else {
+                      
+                          attestationArray.push(prestationArray);
+                          prestationArray=[]
+                        
+                        
+                            
+    
+                       }
 
                         
                         
@@ -164,10 +187,10 @@ const classes = useStyles();
             case "51":
                           // Object with type="51" found
                           const extractedObject51 = object;
-                          setType51(extractedObject51.zone);
-                          const zoneErreur51 = extractedObject51.zoneErreur;
-                        setType51Error(zoneErreur51);
-                       
+                         
+                        prestationArray.push(extractedObject51);
+                        attestationArray.push(prestationArray);
+                        prestationArray=[];
 
                         
                           // Perform any additional actions with the extracted object here
@@ -189,9 +212,9 @@ const classes = useStyles();
             case "80":
                               // Object with type="80" found
                               const extractedObject80 = object;
-                              setType80(extractedObject80.zone);
-                              const zoneErreur80 = extractedObject80.zoneErreur;
-                              setType80Error(zoneErreur80);
+                              attestationArray.push(extractedObject80);
+                              attestation1.push(attestationArray)
+                           attestationArray=[];
                               
       
                               // Perform any additional actions with the extracted object here
@@ -236,7 +259,10 @@ const classes = useStyles();
               // ...
               break;
           }
-
+          setAttestation(attestation1);
+        console.log(attestation1)
+         
+           
         }
   
         setType(response.data.fileType);
@@ -390,242 +416,150 @@ const classes = useStyles();
       }
     </>
  )
-}
-
-
-
-
-   
-  
-   
-{type20  && (type20[0].contenu !== '')&&
- ( 
-    <>
-      <h1 style={{ marginTop: "50px" }}>Enregistrement de type 20</h1>
-      <TableContainer component={Paper} style={{ marginTop: "50px" }}>
-        <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
-          <TableHead>
-          <TableRow>
-              {Object.keys(type20).map((t) => { 
-                const nomZone=type20[t]?.zoneEmbedded?.nom_zone;
+    }
+    {attestation && Object.keys(attestation).map((t,index) => (
+    <div style={{marginTop:"50px"}}key={index}>
+   { showTables ?(<h1><i style={{color: "#1b9d42"}} class="fa-sharp fa-solid fa-chevron-up" onClick={toggleTables}></i> Attestation {index+1}</h1>
+   ):(<h1><i style={{color: "#1b9d42"}} class="fa-sharp fa-solid fa-chevron-down" onClick={toggleTables}></i> Attestation {index+1}</h1>)
+   }
+    
+    <div>
+  {showTables && Object.keys(attestation[t]).map((attkey, index) => (
+    <React.Fragment key={index}>
+      {attestation[t][attkey].type && attestation[t][attkey]?.type ? (
+        <div>
+          <h1 style={{ marginTop: "50px" }}>Enregistrement de type {attestation[t][attkey]?.type}</h1>
+          <TableContainer component={Paper} style={{ marginTop: "50px" }}>
+            <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
+              <TableHead>
+                <TableRow>
+                  {attestation[t][attkey]?.zone &&
+                    Object.keys(attestation[t][attkey]?.zone).map((k) => {
+                      const nomZone=attestation[t][attkey]?.zone[k]?.zoneEmbedded?.nom_zone;
              
                 return(
-                 
-                <TableCell className={classes.tableCell} 
+                      <TableCell className={classes.tableCell} 
  style={{
-  color: Object.keys(type20Error).map((t) =>
+  color: Object.keys(attestation[t][attkey]?.zoneErreur).map((h) =>
   
-    nomZone === type20Error[t].nom_zone
+    nomZone === attestation[t][attkey]?.zoneErreur[h]?.nom_zone
       ? '#d62828'
       : ''
   ),
-}} align="center">
-                  {type20[t]?.zoneEmbedded?.nom_zone}-
-                  {type20[t]?.zoneEmbedded?.desription}
-                </TableCell>
- )})}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.keys(type20).map((t) => (
-              <TableCell className={classes.tableCell} component="th" scope="row" align="center">
-                {type20[t]?.contenu}
-              </TableCell>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {
-        Object.keys(type20Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type20Error[t].code}] {type20Error[t].libelle}</h1>
+}}  align="center" key={k}>
+                        {attestation[t][attkey].zone[k]?.zoneEmbedded?.nom_zone}-
+                        {attestation[t][attkey].zone[k]?.zoneEmbedded?.desription}
+                      </TableCell>
+                    )})}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {attestation[t][attkey]?.zone &&
+                  Object.keys(attestation[t][attkey]?.zone).map((k) => (
+                    <TableCell className={classes.tableCell} component="th" scope="row" align="center" key={k}>
+                      {attestation[t][attkey]?.zone[k]?.contenu}
+                    </TableCell>
+                  ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          {
+        Object.keys(attestation[t][attkey]?.zoneErreur).map((l) => (
+         <div> <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{attestation[t][attkey]?.zoneErreur[l]?.code}] {attestation[t][attkey]?.zoneErreur[l]?.libelle}</h1>
+         <h1 className={classes.Errors} style={{marginTop:"50px"}}>Erreur dans la zone [{attestation[t][attkey]?.zoneErreur[l]?.nom_zone}]</h1>
+        </div>
         ))
       }
-    </>
- )
-}
-   
-{type30  && (type30[0].contenu !== '')&&
- ( 
-    <>
-      <h1 style={{ marginTop: "50px" }}>Enregistrement de type 30</h1>
-      <TableContainer component={Paper} style={{ marginTop: "50px" }}>
-        <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
-          <TableHead>
-          <TableRow>
-              {Object.keys(type30).map((t) => { 
-                const nomZone=type30[t]?.zoneEmbedded?.nom_zone;
-                return(
-                 
-                <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type30Error).map((t) =>
-  ( 
-    nomZone === type30Error[t].nom_zone)
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
-                  {type30[t]?.zoneEmbedded?.nom_zone}-
-                  {type30[t]?.zoneEmbedded?.desription}
-                </TableCell>
- )})}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.keys(type30).map((t) => (
-              <TableCell className={classes.tableCell} component="th" scope="row" align="center">
-                {type30[t]?.contenu}
-              </TableCell>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {
-        Object.keys(type30Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type30Error[t].code}] {type30Error[t].libelle}</h1>
-        ))
-      }
-    </>
- )
-}
-    
-{type40 &&  (type40[0].contenu !== '')&&
- ( 
-    <>
-      <h1 style={{ marginTop: "50px" }}>Enregistrement de type 40</h1>
-      <TableContainer component={Paper} style={{ marginTop: "50px" }}>
-        <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
-          <TableHead>
-          <TableRow>
-              {Object.keys(type40).map((t) => { 
-                const nomZone=type40[t]?.zoneEmbedded?.nom_zone;
-                return(
-                 
-                <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type40Error).map((t) =>
-  ( 
-    nomZone === type40Error[t].nom_zone)
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
-                  {type40[t]?.zoneEmbedded?.nom_zone}-
-                  {type40[t]?.zoneEmbedded?.desription}
-                </TableCell>
- )})}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.keys(type40).map((t) => (
-              <TableCell className={classes.tableCell} component="th" scope="row" align="center">
-                {type40[t]?.contenu}
-              </TableCell>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {
-        Object.keys(type40Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type40Error[t].code}] {type40Error[t].libelle}</h1>
-        ))
-      }
-    </>
- )
-}
-    
-{type50 &&  (type50[0].contenu !== '')&&
- ( 
-    <>
-      <h1 style={{ marginTop: "50px" }}>Enregistrement de type 50</h1>
-      <TableContainer component={Paper} style={{ marginTop: "50px" }}>
-        <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
-          <TableHead>
-            <TableRow>
-              {Object.keys(type50).map((t) => { 
-                const nomZone=type50[t]?.zoneEmbedded?.nom_zone;
-                return(
-                 
-                <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type50Error).map((t) =>
-  ( 
-    nomZone === type50Error[t].nom_zone)
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
-                  {type50[t]?.zoneEmbedded?.nom_zone}-
-                  {type50[t]?.zoneEmbedded?.desription}
-                </TableCell>
- )})}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.keys(type50).map((t) => (
-              <TableCell className={classes.tableCell} component="th" scope="row" align="center">
-                {type50[t]?.contenu}
-              </TableCell>
-            ))}
-          </TableBody>
+        </div>
+      ) : (
+        <>
+          <div style={{ marginTop: "50px" }} key={index}>
+            <h1>
+              <i
+                style={{ color: "#1b9d42" }}
+                className="fa-sharp fa-solid fa-chevron-down"
+                onClick={toggleTables}
+              ></i>{" "}
+              Prestation {index}
+            </h1>
+            <div>
+              {Object.keys(attestation[t][attkey]).map((a, indexprestation) => (
 
-        </Table>
-      </TableContainer>
+
+                <div key={indexprestation}>
+                  <h1 style={{ marginTop: "50px" }}>Enregistrement de type {attestation[t][attkey][a]?.type}</h1>
+                  <TableContainer component={Paper} style={{ marginTop: "50px" }}>
+                    <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
+                      <TableHead>
+                        <TableRow>
+                          {attestation[t][attkey][a]?.zone &&
+                            Object.keys(attestation[t][attkey][a]?.zone).map((k) => {
+                              const nomZone=attestation[t][attkey][a]?.zone[k]?.zoneEmbedded?.nom_zone;
+             
+             return(
+                   <TableCell className={classes.tableCell} 
+style={{
+color: Object.keys(attestation[t][attkey][a]?.zoneErreur).map((h) =>
+
+ nomZone === attestation[t][attkey][a]?.zoneErreur[h]?.nom_zone
+   ? '#d62828'
+   : ''
+),
+}}  align="center" key={k}>
+                              
+                               
+                                {attestation[t][attkey][a].zone[k]?.zoneEmbedded?.nom_zone}-
+                                {attestation[t][attkey][a].zone[k]?.zoneEmbedded?.desription}
+                              </TableCell>
+                           )})}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {attestation[t][attkey][a]?.zone &&
+                          Object.keys(attestation[t][attkey][a]?.zone).map((k) => (
+                            <TableCell
+                              className={classes.tableCell}
+                              component="th"
+                              scope="row"
+                              align="center"
+                              key={k}
+                            >
+                              {attestation[t][attkey][a]?.zone[k]?.contenu}
+                            </TableCell>
+                          ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                  {
+        Object.keys(attestation[t][attkey][a]?.zoneErreur).map((l) => (
+        <div>  <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{attestation[t][attkey][a]?.zoneErreur[l]?.code}] {attestation[t][attkey][a]?.zoneErreur[l]?.libelle}</h1>
+      
+        <h1 className={classes.Errors} style={{marginTop:"50px"}}>Erreur dans la zone [{attestation[t][attkey][a]?.zoneErreur[l]?.nom_zone}]</h1> </div>
+        ))
+      }
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </React.Fragment>
+  ))}
+</div>
+ </div>
+    ))
+    }
+    
+
+
+
+
+
+
+
   
-      {
-        Object.keys(type50Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type50Error[t].code}] {type50Error[t].libelle}</h1>
-        ))
-      }
-    
-    </>
- )
-} 
 
-{type51  && (type51[0].contenu !== '')&&
- ( 
-    <>
-      <h1 style={{ marginTop: "50px" }}>Enregistrement de type 51</h1>
-      <TableContainer component={Paper} style={{ marginTop: "50px" }}>
-        <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
-          <TableHead>
-          <TableRow>
-              {Object.keys(type51).map((t) => { 
-                const nomZone=type51[t]?.zoneEmbedded?.nom_zone;
-                return(
-                 
-                <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type51Error).map((t) =>
-  ( 
-    nomZone === type51Error[t].nom_zone)
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
-                  {type51[t]?.zoneEmbedded?.nom_zone}-
-                  {type51[t]?.zoneEmbedded?.desription}
-                </TableCell>
- )})}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.keys(type51).map((t) => (
-              <TableCell className={classes.tableCell} component="th" scope="row" align="center">
-                {type51[t]?.contenu}
-              </TableCell>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {
-        Object.keys(type51Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type51Error[t].code}] {type51Error[t].libelle}</h1>
-        ))
-      }
-    </>
- )
-}
+
 {type52  && (type52[0].contenu !== '')&&
  ( 
     <>
@@ -670,51 +604,8 @@ const classes = useStyles();
     </>
  )
 }
-{type80  && (type80[0].contenu !== '')&&
- ( 
-    <>
-      <h1 style={{ marginTop: "50px" }}>Enregistrement de type 80</h1>
-      <TableContainer component={Paper} style={{ marginTop: "50px" }}>
-        <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
-          <TableHead>
-          <TableRow>
-              {Object.keys(type80).map((t) => { 
-                const nomZone=type80[t]?.zoneEmbedded?.nom_zone;
-                return(
-                 
-                <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type80Error).map((t) =>
-  ( 
-    nomZone === type80Error[t].nom_zone)
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
-                  {type80[t]?.zoneEmbedded?.nom_zone}-
-                  {type80[t]?.zoneEmbedded?.desription}
-                </TableCell>
- )})}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.keys(type80).map((t) => (
-              <TableCell className={classes.tableCell} component="th" scope="row" align="center">
-                {type80[t]?.contenu}
-              </TableCell>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {
-        Object.keys(type80Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type80Error[t].code}] {type80Error[t].libelle}</h1>
-        ))
-      }
-    </>
- )
-}
-    
+
+
 {type90  && (type90[0].contenu !== '')&&
  ( 
     <>

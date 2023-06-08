@@ -5,12 +5,16 @@
 }
 .file-type{
     margin-right: 50px;
-    color:#6c757d;
+    color:#9fabb6;
     margin-left: 20px;
 }
 .file{
     margin-right: 50px;
     color:#000000;
     margin-left: 20px;
-    border-bottom: #0fafa7 3px solid;
+    border-bottom: #0d80c7 3px solid;
+   
+}
+h1{
+    font-weight: 700
 }

@@ -16,6 +16,7 @@ import HeaderStats from "../../components/Headers/HeaderStats.js";
 import FooterAdmin from "../../components/Footers/FooterAdmin.js";
 import axios from 'axios';
 import { makeStyles } from '@material-ui/core/styles';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const useStyles = makeStyles({
   tableCell: {
@@ -32,22 +33,12 @@ const useStyles = makeStyles({
 });
 
 
-function File() {
+function FileFacture() {
   let {id}=useParams();
   const [recordRejet,setRecordRejet] = React.useState([]);
-  const [Errors,setErrors] = React.useState([]);
+ 
   const [type,setType] = React.useState("");
-  const [type10Error,setType10Error] = React.useState([{code:'',lettre:'',libelle:''}]);
-  const [type20Error,setType20Error] = React.useState([{code:'',lettre:'',libelle:'',nom_zone:''}]);
-  const [type30Error,setType30Error] = React.useState([{code:'',lettre:'',libelle:''}]);
-  const [type40Error,setType40Error] = React.useState([{code:'',lettre:'',libelle:''}]);
-  const [type50Error,setType50Error] = React.useState([{code:'',lettre:'',libelle:'',nom_zone:''}]);
-  const [type51Error,setType51Error] = React.useState([{code:'',lettre:'',libelle:''}]);
-  const [type52Error,setType52Error] = React.useState([{code:'',lettre:'',libelle:''}]);
-  const [type80Error,setType80Error] = React.useState([{code:'',lettre:'',libelle:''}]);
-  const [type90Error,setType90Error] = React.useState([{code:'',lettre:'',libelle:''}]);
-  const [type95Error,setType95Error] = React.useState([{code:'',lettre:'',libelle:''}]);
-  const [type96Error,setType96Error] = React.useState([{code:'',lettre:'',libelle:''}]);
+  
   const [type200,setType200] = React.useState([{contenu:'',zoneEmbedded:{longueur:'',desription:'',nom_zone:''}}]);
   const [type300,setType300] = React.useState([{contenu:'',zoneEmbedded:{longueur:'',desription:'',nom_zone:''}}]);
   const [type10,setType10] = React.useState([{contenu:'',zoneEmbedded:{longueur:'',desription:'',nom_zone:''}}]);
@@ -61,16 +52,25 @@ function File() {
   const [type90,setType90] = React.useState([{contenu:'',zoneEmbedded:{longueur:'',desription:'',nom_zone:''}}]);
   const [type95,setType95] = React.useState([{contenu:'',zoneEmbedded:{longueur:'',desription:'',nom_zone:''}}]);
   const [type96,setType96] = React.useState([{contenu:'',zoneEmbedded:{longueur:'',desription:'',nom_zone:''}}]);
-
+  const [attestation,setAttestation] = React.useState([{content:'',type:'',zone:[{contenu:'',zoneEmbedded:{longueur:'',desription:'',nom_zone:''}}],zoneErreur:[]}])
+  const [showTables, setShowTables] = React.useState(false);
   // Inside your component
 const classes = useStyles();
+const toggleTables = () => {
+    setShowTables(!showTables);
+  };
+
   function getById() {
     axios
       .get(`http://localhost:8080/files/${id}`)
       .then(function (response) {
-        const recordRejetArray = response.data.recordRejet;
+        const recordRejetArray = response.data.record;
         console.log(recordRejetArray);
        
+        let attestation1=[]
+        let attestationArray=[];
+        
+        let prestationArray=[];
     
 
         // Iterate over the array
@@ -100,8 +100,7 @@ const classes = useStyles();
                 // Object with type="10" found
                 const extractedObject10 = object;
                 setType10(extractedObject10.zone);
-                const zoneErreur1 = extractedObject10.zoneErreur;
-                setType10Error(zoneErreur1);
+                
                 
 
                 
@@ -113,9 +112,8 @@ const classes = useStyles();
             case "20":
                   // Object with type="20" found
                   const extractedObject20 = object;
-                  setType20(extractedObject20.zone);
-                  const zoneErreur2 = extractedObject20.zoneErreur;
-                  setType20Error(zoneErreur2);
+                  attestationArray.push(extractedObject20);
+
                   
                 
                   
@@ -126,8 +124,7 @@ const classes = useStyles();
                     // Object with type="30" found
             const extractedObject30 = object;
                     setType30(extractedObject30.zone);
-                    const zoneErreur3 = extractedObject30.zoneErreur;
-                    setType30Error(zoneErreur3);
+                   
                   
 
                     
@@ -138,9 +135,7 @@ const classes = useStyles();
                       // Object with type="40" found
                       const extractedObject40 = object;
                       setType40(extractedObject40.zone);
-                      const zoneErreur4 = extractedObject40.zoneErreur;
-                      setType40Error(zoneErreur4);
-                    
+                      
 
                       
                       // Perform any additional actions with the extracted object here
@@ -149,10 +144,20 @@ const classes = useStyles();
             case "50":
                         // Object with type="50" found
                         const extractedObject50 = object;
-                        setType50(extractedObject50.zone);
-                        const zoneErreur = extractedObject50.zoneErreur;
-                        setType50Error(zoneErreur);
-                       
+                        prestationArray.push(extractedObject50);
+                        const objectsucc=recordRejetArray[i+1]
+                        if (objectsucc.type==="51")
+                        {
+                          prestationArray.push(objectsucc);
+                          attestationArray.push(prestationArray);
+                          prestationArray=[]
+                        }
+                        else{
+                          attestationArray.push(prestationArray);
+                          prestationArray=[]
+                        }
+                     
+
 
                         
                         
@@ -164,10 +169,8 @@ const classes = useStyles();
             case "51":
                           // Object with type="51" found
                           const extractedObject51 = object;
-                          setType51(extractedObject51.zone);
-                          const zoneErreur51 = extractedObject51.zoneErreur;
-                        setType51Error(zoneErreur51);
-                       
+                         
+                        
 
                         
                           // Perform any additional actions with the extracted object here
@@ -177,10 +180,7 @@ const classes = useStyles();
                             // Object with type="52" found
                             const extractedObject52 = object;
                             setType52(extractedObject52.zone);
-                            const zoneErreur52 = extractedObject52.zoneErreur;
-                            setType52Error(zoneErreur52);
-                            
-    
+                           
                             
                             // Perform any additional actions with the extracted object here
                             // ...
@@ -189,9 +189,9 @@ const classes = useStyles();
             case "80":
                               // Object with type="80" found
                               const extractedObject80 = object;
-                              setType80(extractedObject80.zone);
-                              const zoneErreur80 = extractedObject80.zoneErreur;
-                              setType80Error(zoneErreur80);
+                              attestationArray.push(extractedObject80);
+                              attestation1.push(attestationArray)
+                           attestationArray=[];
                               
       
                               // Perform any additional actions with the extracted object here
@@ -201,10 +201,7 @@ const classes = useStyles();
                                 // Object with type="90" found
                                 const extractedObject90 = object;
                                 setType90(extractedObject90.zone);
-                                const zoneErreur90 = extractedObject90.zoneErreur;
-                                setType90Error(zoneErreur90);
-                              
-        
+                               
                                 
                                 // Perform any additional actions with the extracted object here
                                 // ...
@@ -213,9 +210,7 @@ const classes = useStyles();
                                   // Object with type="95" found
                                   const extractedObject95 = object;
                                   setType95(extractedObject95.zone);
-                                  const zoneErreur95 = extractedObject95.zoneErreur;
-                                  setType95Error(zoneErreur95);
-                                  
+                                
           
                                   // Perform any additional actions with the extracted object here
                                   // ...
@@ -224,9 +219,7 @@ const classes = useStyles();
                                     // Object with type="96" found
                                     const extractedObject96 = object;
                                     setType96(extractedObject96.zone);
-                                    const zoneErreur96 = extractedObject96.zoneErreur;
-                                    setType96Error(zoneErreur96);
-                                  
+                                   
             
                                     // Perform any additional actions with the extracted object here
                                     // ...
@@ -236,7 +229,10 @@ const classes = useStyles();
               // ...
               break;
           }
-
+          setAttestation(attestation1);
+        console.log(attestation)
+      
+           
         }
   
         setType(response.data.fileType);
@@ -247,8 +243,7 @@ const classes = useStyles();
 
  useEffect(() => 
   {getById();
-   console.log(type20Error);
-   console.log(type20);
+  
   
   })
 
@@ -347,7 +342,7 @@ const classes = useStyles();
       </Table>
     </TableContainer>
     <h1 style={{marginTop:"50px"}}>Détails de la facture</h1>
-    {type10  && (type10[0].contenu !== '')&&
+    {type10  && (type10[0]?.contenu !== '')&&
  ( 
     <>
       <h1 style={{ marginTop: "50px" }}>Enregistrement de type 10</h1>
@@ -360,14 +355,7 @@ const classes = useStyles();
                 return(
                  
                 <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type10Error).map((t) =>
-    ( 
-    nomZone === type10Error[t].nom_zone)
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
+ align="center">
                   {type10[t]?.zoneEmbedded?.nom_zone}-
                   {type10[t]?.zoneEmbedded?.desription}
                 </TableCell>
@@ -383,249 +371,109 @@ const classes = useStyles();
           </TableBody>
         </Table>
       </TableContainer>
-      {
-        Object.keys(type10Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type10Error[t].code}] {type10Error[t].libelle}</h1>
-        ))
-      }
-    </>
- )
-}
-
-
-
-
    
-  
-   
-{type20  && (type20[0].contenu !== '')&&
- ( 
-    <>
-      <h1 style={{ marginTop: "50px" }}>Enregistrement de type 20</h1>
-      <TableContainer component={Paper} style={{ marginTop: "50px" }}>
-        <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
-          <TableHead>
-          <TableRow>
-              {Object.keys(type20).map((t) => { 
-                const nomZone=type20[t]?.zoneEmbedded?.nom_zone;
-             
-                return(
-                 
-                <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type20Error).map((t) =>
-  
-    nomZone === type20Error[t].nom_zone
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
-                  {type20[t]?.zoneEmbedded?.nom_zone}-
-                  {type20[t]?.zoneEmbedded?.desription}
-                </TableCell>
- )})}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.keys(type20).map((t) => (
-              <TableCell className={classes.tableCell} component="th" scope="row" align="center">
-                {type20[t]?.contenu}
-              </TableCell>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {
-        Object.keys(type20Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type20Error[t].code}] {type20Error[t].libelle}</h1>
-        ))
-      }
     </>
  )
 }
-   
-{type30  && (type30[0].contenu !== '')&&
- ( 
-    <>
-      <h1 style={{ marginTop: "50px" }}>Enregistrement de type 30</h1>
-      <TableContainer component={Paper} style={{ marginTop: "50px" }}>
-        <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
-          <TableHead>
-          <TableRow>
-              {Object.keys(type30).map((t) => { 
-                const nomZone=type30[t]?.zoneEmbedded?.nom_zone;
-                return(
-                 
-                <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type30Error).map((t) =>
-  ( 
-    nomZone === type30Error[t].nom_zone)
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
-                  {type30[t]?.zoneEmbedded?.nom_zone}-
-                  {type30[t]?.zoneEmbedded?.desription}
-                </TableCell>
- )})}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.keys(type30).map((t) => (
-              <TableCell className={classes.tableCell} component="th" scope="row" align="center">
-                {type30[t]?.contenu}
-              </TableCell>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {
-        Object.keys(type30Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type30Error[t].code}] {type30Error[t].libelle}</h1>
-        ))
-      }
-    </>
- )
-}
+{attestation && Object.keys(attestation).map((t,index) => (
+    <div style={{marginTop:"50px"}}key={index}>
+   { showTables ?(<h1><i style={{color: "#1b9d42"}} class="fa-sharp fa-solid fa-chevron-up" onClick={toggleTables}></i> Attestation {index+1}</h1>
+   ):(<h1><i style={{color: "#1b9d42"}} class="fa-sharp fa-solid fa-chevron-down" onClick={toggleTables}></i> Attestation {index+1}</h1>)
+   }
     
-{type40 &&  (type40[0].contenu !== '')&&
- ( 
-    <>
-      <h1 style={{ marginTop: "50px" }}>Enregistrement de type 40</h1>
-      <TableContainer component={Paper} style={{ marginTop: "50px" }}>
-        <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
-          <TableHead>
-          <TableRow>
-              {Object.keys(type40).map((t) => { 
-                const nomZone=type40[t]?.zoneEmbedded?.nom_zone;
-                return(
-                 
-                <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type40Error).map((t) =>
-  ( 
-    nomZone === type40Error[t].nom_zone)
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
-                  {type40[t]?.zoneEmbedded?.nom_zone}-
-                  {type40[t]?.zoneEmbedded?.desription}
-                </TableCell>
- )})}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.keys(type40).map((t) => (
-              <TableCell className={classes.tableCell} component="th" scope="row" align="center">
-                {type40[t]?.contenu}
-              </TableCell>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {
-        Object.keys(type40Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type40Error[t].code}] {type40Error[t].libelle}</h1>
-        ))
-      }
-    </>
- )
-}
-    
-{type50 &&  (type50[0].contenu !== '')&&
- ( 
-    <>
-      <h1 style={{ marginTop: "50px" }}>Enregistrement de type 50</h1>
-      <TableContainer component={Paper} style={{ marginTop: "50px" }}>
-        <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
-          <TableHead>
-            <TableRow>
-              {Object.keys(type50).map((t) => { 
-                const nomZone=type50[t]?.zoneEmbedded?.nom_zone;
-                return(
-                 
-                <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type50Error).map((t) =>
-  ( 
-    nomZone === type50Error[t].nom_zone)
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
-                  {type50[t]?.zoneEmbedded?.nom_zone}-
-                  {type50[t]?.zoneEmbedded?.desription}
-                </TableCell>
- )})}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.keys(type50).map((t) => (
-              <TableCell className={classes.tableCell} component="th" scope="row" align="center">
-                {type50[t]?.contenu}
-              </TableCell>
-            ))}
-          </TableBody>
+    <div>
+  {showTables && Object.keys(attestation[t]).map((attkey, index) => (
+    <React.Fragment key={index}>
+      {attestation[t][attkey].type && attestation[t][attkey].type ? (
+        <div>
+          <h1 style={{ marginTop: "50px" }}>Enregistrement de type {attestation[t][attkey]?.type}</h1>
+          <TableContainer component={Paper} style={{ marginTop: "50px" }}>
+            <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
+              <TableHead>
+                <TableRow>
+                  {attestation[t][attkey]?.zone &&
+                    Object.keys(attestation[t][attkey]?.zone).map((k) => (
+                      <TableCell className={classes.tableCell} align="center" key={k}>
+                        {attestation[t][attkey].zone[k]?.zoneEmbedded?.nom_zone}-
+                        {attestation[t][attkey].zone[k]?.zoneEmbedded?.desription}
+                      </TableCell>
+                    ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {attestation[t][attkey]?.zone &&
+                  Object.keys(attestation[t][attkey]?.zone).map((k) => (
+                    <TableCell className={classes.tableCell} component="th" scope="row" align="center" key={k}>
+                      {attestation[t][attkey]?.zone[k]?.contenu}
+                    </TableCell>
+                  ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+      ) : (
+        <>
+          <div style={{ marginTop: "50px" }} key={index}>
+            <h1>
+              <i
+                style={{ color: "#1b9d42" }}
+                className="fa-sharp fa-solid fa-chevron-down"
+                onClick={toggleTables}
+              ></i>{" "}
+              Prestation {index}
+            </h1>
+            <div>
+              {Object.keys(attestation[t][attkey]).map((a, indexprestation) => (
 
-        </Table>
-      </TableContainer>
-  
-      {
-        Object.keys(type50Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type50Error[t].code}] {type50Error[t].libelle}</h1>
-        ))
-      }
-    
-    </>
- )
-} 
 
-{type51  && (type51[0].contenu !== '')&&
- ( 
-    <>
-      <h1 style={{ marginTop: "50px" }}>Enregistrement de type 51</h1>
-      <TableContainer component={Paper} style={{ marginTop: "50px" }}>
-        <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
-          <TableHead>
-          <TableRow>
-              {Object.keys(type51).map((t) => { 
-                const nomZone=type51[t]?.zoneEmbedded?.nom_zone;
-                return(
-                 
-                <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type51Error).map((t) =>
-  ( 
-    nomZone === type51Error[t].nom_zone)
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
-                  {type51[t]?.zoneEmbedded?.nom_zone}-
-                  {type51[t]?.zoneEmbedded?.desription}
-                </TableCell>
- )})}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.keys(type51).map((t) => (
-              <TableCell className={classes.tableCell} component="th" scope="row" align="center">
-                {type51[t]?.contenu}
-              </TableCell>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {
-        Object.keys(type51Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type51Error[t].code}] {type51Error[t].libelle}</h1>
-        ))
-      }
-    </>
- )
-}
+                <div key={indexprestation}>
+                  <h1 style={{ marginTop: "50px" }}>Enregistrement de type {attestation[t][attkey][a]?.type}</h1>
+                  <TableContainer component={Paper} style={{ marginTop: "50px" }}>
+                    <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
+                      <TableHead>
+                        <TableRow>
+                          {attestation[t][attkey][a]?.zone &&
+                            Object.keys(attestation[t][attkey][a]?.zone).map((k) => (
+                              <TableCell className={classes.tableCell} align="center" key={k}>
+                                {attestation[t][attkey][a].zone[k]?.zoneEmbedded?.nom_zone}-
+                                {attestation[t][attkey][a].zone[k]?.zoneEmbedded?.desription}
+                              </TableCell>
+                            ))}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {attestation[t][attkey][a]?.zone &&
+                          Object.keys(attestation[t][attkey][a]?.zone).map((k) => (
+                            <TableCell
+                              className={classes.tableCell}
+                              component="th"
+                              scope="row"
+                              align="center"
+                              key={k}
+                            >
+                              {attestation[t][attkey][a]?.zone[k]?.contenu}
+                            </TableCell>
+                          ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </React.Fragment>
+  ))}
+</div>
+ </div>
+    ))
+    }
+    
+
+
+  
+
 {type52  && (type52[0].contenu !== '')&&
  ( 
     <>
@@ -639,14 +487,7 @@ const classes = useStyles();
                 return(
                  
                 <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type52Error).map((t) =>
-  ( 
-    nomZone === type52Error[t].nom_zone)
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
+ align="center">
                   {type52[t]?.zoneEmbedded?.nom_zone}-
                   {type52[t]?.zoneEmbedded?.desription}
                 </TableCell>
@@ -662,59 +503,12 @@ const classes = useStyles();
           </TableBody>
         </Table>
       </TableContainer>
-      {
-        Object.keys(type52Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type52Error[t].code}] {type52Error[t].libelle}</h1>
-        ))
-      }
+     
     </>
  )
 }
-{type80  && (type80[0].contenu !== '')&&
- ( 
-    <>
-      <h1 style={{ marginTop: "50px" }}>Enregistrement de type 80</h1>
-      <TableContainer component={Paper} style={{ marginTop: "50px" }}>
-        <Table sx={{ minWidth: 700 }} size="medium" aria-label="a dense table">
-          <TableHead>
-          <TableRow>
-              {Object.keys(type80).map((t) => { 
-                const nomZone=type80[t]?.zoneEmbedded?.nom_zone;
-                return(
-                 
-                <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type80Error).map((t) =>
-  ( 
-    nomZone === type80Error[t].nom_zone)
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
-                  {type80[t]?.zoneEmbedded?.nom_zone}-
-                  {type80[t]?.zoneEmbedded?.desription}
-                </TableCell>
- )})}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {Object.keys(type80).map((t) => (
-              <TableCell className={classes.tableCell} component="th" scope="row" align="center">
-                {type80[t]?.contenu}
-              </TableCell>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      {
-        Object.keys(type80Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type80Error[t].code}] {type80Error[t].libelle}</h1>
-        ))
-      }
-    </>
- )
-}
-    
+
+
 {type90  && (type90[0].contenu !== '')&&
  ( 
     <>
@@ -728,14 +522,7 @@ const classes = useStyles();
                 return(
                  
                 <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type90Error).map((t) =>
-  ( 
-    nomZone === type90Error[t].nom_zone)
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
+ align="center">
                   {type90[t]?.zoneEmbedded?.nom_zone}-
                   {type90[t]?.zoneEmbedded?.desription}
                 </TableCell>
@@ -751,16 +538,12 @@ const classes = useStyles();
           </TableBody>
         </Table>
       </TableContainer>
-      {
-        Object.keys(type90Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type90Error[t].code}] {type90Error[t].libelle}</h1>
-        ))
-      }
+     
     </>
  )
 }
    
-{((type95  && (type95[0].contenu !== ''))||(type96  && (type96[0].contenu !== '')))&&
+{((type95  && (type95[0]?.contenu !== ''))||(type96  && (type96[0]?.contenu !== '')))&&
  ( 
     <>
     <h1 style={{ marginTop: "50px" }}>Bas de la facture</h1>
@@ -768,7 +551,7 @@ const classes = useStyles();
     </>
  )
 }
-{type95  && (type95[0].contenu !== '')&&
+{type95  && (type95[0]?.contenu !== '')&&
  ( 
     <>
       <h1 style={{ marginTop: "50px" }}>Enregistrement de type 95</h1>
@@ -781,15 +564,7 @@ const classes = useStyles();
                 return(
                  
                 <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type95Error).map((t) =>
-    (type95Error[t].code.substring(2, 3) === '0' &&
-    nomZone === type95Error[t].code.substring(4, 5)) ||  (type95Error[t].code.substring(2, 3) !== '0' &&
-    nomZone === type95Error[t].code.substring(3, 5))
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
+ align="center">
                   {type95[t]?.zoneEmbedded?.nom_zone}-
                   {type95[t]?.zoneEmbedded?.desription}
                 </TableCell>
@@ -805,15 +580,11 @@ const classes = useStyles();
           </TableBody>
         </Table>
       </TableContainer>
-      {
-        Object.keys(type95Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type95Error[t].code}] {type95Error[t].libelle}</h1>
-        ))
-      }
+    
     </>
  )
 }
-{type96  && (type96[0].contenu !== '')&&
+{type96  && (type96[0]?.contenu !== '')&&
  ( 
     <>
       <h1 style={{ marginTop: "50px" }}>Enregistrement de type 96</h1>
@@ -826,15 +597,7 @@ const classes = useStyles();
                 return(
                  
                 <TableCell className={classes.tableCell} 
- style={{
-  color: Object.keys(type96Error).map((t) =>
-    (type96Error[t].code.substring(2, 3) === '0' &&
-    nomZone === type96Error[t].code.substring(4, 5)) ||  (type96Error[t].code.substring(2, 3) !== '0' &&
-    nomZone === type96Error[t].code.substring(3, 5))
-      ? '#d62828'
-      : ''
-  ),
-}} align="center">
+  align="center">
                   {type96[t]?.zoneEmbedded?.nom_zone}-
                   {type96[t]?.zoneEmbedded?.desription}
                 </TableCell>
@@ -850,11 +613,7 @@ const classes = useStyles();
           </TableBody>
         </Table>
       </TableContainer>
-      {
-        Object.keys(type96Error).map((t) => (
-          <h1 className={classes.Errors} style={{marginTop:"50px"}}>[{type96Error[t].code}] {type96Error[t].libelle}</h1>
-        ))
-      }
+   
     </>
  )
 }
@@ -873,4 +632,4 @@ const classes = useStyles();
   )
 }
 
-export default File
+export default FileFacture
